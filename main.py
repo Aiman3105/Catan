@@ -46,7 +46,7 @@ for res, data in Ressourcen.items():
 # -----------------------------
 # Reset Button mit Symbol
 # -----------------------------
-if st.button("🔄 Reset"):
+if st.button("🔄"):
     for res, data in Ressourcen.items():
         for i in range(data["anzahl"]):
             st.session_state[f"{res}_{i}"] = 7  # Resetwert auf 7
