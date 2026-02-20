@@ -17,56 +17,21 @@ Ressourcen = {
 st.title("Ressourcen Rechner")
 
 # -----------------------------
-# Kompaktes CSS
+# Kompaktes CSS für Mobile
 # -----------------------------
 st.markdown("""
 <style>
-
-/* Weniger Abstand global */
-.block-container {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-}
-
+.block-container { padding-top:0.5rem; padding-bottom:0.5rem; }
 /* Resource Card */
-.resource-card {
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 14px;
-}
-
-/* Counter Box */
-.counter-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 6px;
-}
-
+.resource-card { padding:6px; border-radius:12px; margin-bottom:6px; }
 /* Zahl */
-.counter-number {
-    font-size: 20px;
-    font-weight: 600;
-    width: 28px;
-    text-align: center;
-}
-
-/* Buttons */
-.stButton button {
-    width: 36px !important;
-    height: 36px !important;
-    padding: 0px !important;
-    font-size: 18px !important;
-    border-radius: 8px !important;
-}
-
+.counter-number { font-size:18px; font-weight:600; width:28px; text-align:center; display:inline-block; }
+/* ± Buttons */
+.stButton button { width:32px !important; height:32px !important; font-size:18px !important; padding:0 !important; border-radius:6px !important; }
+/* Reset Button breiter */
+#reset-button button { width:120px !important; height:40px !important; font-size:18px !important; }
 /* Weniger Abstand zwischen Spalten */
-div[data-testid="column"] {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-}
-
+div[data-testid="column"] { padding-left:2px !important; padding-right:2px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -77,67 +42,53 @@ for res, data in Ressourcen.items():
     for i in range(data["anzahl"]):
         key = f"{res}_{i}"
         if key not in st.session_state:
-            st.session_state[key] = 7
+            st.session_state[key] = 6
 
 # -----------------------------
 # Reset Button
 # -----------------------------
+st.markdown('<div id="reset-button">', unsafe_allow_html=True)
 if st.button("Reset"):
     for res, data in Ressourcen.items():
         for i in range(data["anzahl"]):
-            st.session_state[f"{res}_{i}"] = 7
+            st.session_state[f"{res}_{i}"] = 6
     st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
-# Ressourcen Anzeige
+# Ressourcen Anzeige kompakt (alles in einer Reihe pro Ressource)
 # -----------------------------
 Ergebnisse = []
 
 for res, data in Ressourcen.items():
-
     st.markdown(
         f'<div class="resource-card" style="background-color:{data["farbe"]}15;">'
-        f'<div style="font-weight:600; color:{data["farbe"]}; margin-bottom:6px;">{res}</div>',
+        f'<div style="font-weight:600; color:{data["farbe"]}; margin-bottom:4px;">{res}</div>',
         unsafe_allow_html=True
     )
 
-    anzahl = data["anzahl"]
-
-    # Maximal 3 Spalten pro Reihe
-    max_cols = 3
-    rows = (anzahl + max_cols - 1) // max_cols  # Anzahl der benötigten Reihen
-
-    for r in range(rows):
-        cols = st.columns(max_cols)
-        for c in range(max_cols):
-            idx = r * max_cols + c
-            if idx >= anzahl:
-                continue  # Nicht vorhandene Karten überspringen
-            key = f"{res}_{idx}"
-            with cols[c]:
-                c1, c2, c3 = st.columns([1, 1, 1])
-
-                if c1.button("−", key=f"minus_{key}"):
-                    if st.session_state[key] > 0:
-                        st.session_state[key] -= 1
-                        st.rerun()
-
-                c2.markdown(
-                    f'<div class="counter-number">{st.session_state[key]}</div>',
-                    unsafe_allow_html=True
-                )
-
-                if c3.button("+", key=f"plus_{key}"):
-                    if st.session_state[key] < 12:
-                        st.session_state[key] += 1
-                        st.rerun()
+    cols = st.columns(data["anzahl"])
+    for i in range(data["anzahl"]):
+        key = f"{res}_{i}"
+        with cols[i]:
+            c1, c2, c3 = st.columns([1,1,1])
+            if c1.button("−", key=f"minus_{key}"):
+                if st.session_state[key] > 0:
+                    st.session_state[key] -= 1
+                    st.rerun()
+            c2.markdown(
+                f'<div class="counter-number">{st.session_state[key]}</div>',
+                unsafe_allow_html=True
+            )
+            if c3.button("+", key=f"plus_{key}"):
+                if st.session_state[key] < 12:
+                    st.session_state[key] += 1
+                    st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
-
     # Score live berechnen
-    werte = [st.session_state[f"{res}_{i}"] for i in range(anzahl)]
-    summe = func.Score(werte)
-    Ergebnisse.append((res, summe))
+    werte = [st.session_state[f"{res}_{i}"] for i in range(data["anzahl"])]
+    Ergebnisse.append((res, func.Score(werte)))
 
 # -----------------------------
 # Ergebnis in einer Zeile
