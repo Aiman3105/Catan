@@ -17,32 +17,56 @@ Ressourcen = {
 st.title("Ressourcen Rechner")
 
 # -----------------------------
-# CSS Styling (große Buttons!)
+# Kompaktes CSS
 # -----------------------------
 st.markdown("""
 <style>
-.card {
-    padding: 15px;
-    border-radius: 15px;
-    margin-bottom: 20px;
+
+/* Weniger Abstand global */
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
-.counter-row {
+
+/* Resource Card */
+.resource-card {
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+}
+
+/* Counter Box */
+.counter-box {
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 6px;
 }
-.big-number {
-    font-size: 22px;
-    font-weight: bold;
+
+/* Zahl */
+.counter-number {
+    font-size: 20px;
+    font-weight: 600;
+    width: 28px;
     text-align: center;
 }
+
+/* Buttons */
 .stButton button {
-    width: 60px;
-    height: 45px;
-    font-size: 20px;
-    border-radius: 10px;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0px !important;
+    font-size: 18px !important;
+    border-radius: 8px !important;
 }
+
+/* Weniger Abstand zwischen Spalten */
+div[data-testid="column"] {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,7 +84,7 @@ for res, data in Ressourcen.items():
 # -----------------------------
 # Reset Button
 # -----------------------------
-if st.button("🔄 Reset"):
+if st.button("Reset"):
     for res, data in Ressourcen.items():
         for i in range(data["anzahl"]):
             st.session_state[f"{res}_{i}"] = 6
@@ -68,67 +92,81 @@ if st.button("🔄 Reset"):
 
 
 # -----------------------------
-# Ressourcen Cards
+# Ressourcen Anzeige
 # -----------------------------
 Ergebnisse = []
 
 for res, data in Ressourcen.items():
 
     st.markdown(
-        f'<div class="card" style="background-color:{data["farbe"]}20;">'
-        f'<h3 style="color:{data["farbe"]};">{res}</h3>',
+        f'<div class="resource-card" style="background-color:{data["farbe"]}15;">'
+        f'<div style="font-weight:600; color:{data["farbe"]}; margin-bottom:6px;">{res}</div>',
         unsafe_allow_html=True
     )
 
     anzahl = data["anzahl"]
 
-    # Erste Zeile (max 3)
+    # Zeile 1 (max 3)
     first_row = min(3, anzahl)
     cols1 = st.columns(first_row)
 
     for i in range(first_row):
+        key = f"{res}_{i}"
         with cols1[i]:
-            key = f"{res}_{i}"
-            st.markdown('<div class="big-number">%d</div>' % st.session_state[key], unsafe_allow_html=True)
-            minus, plus = st.columns(2)
-            if minus.button("−", key=f"minus_{key}"):
+
+            c1, c2, c3 = st.columns([1,1,1])
+
+            if c1.button("−", key=f"minus_{key}"):
                 if st.session_state[key] > 0:
                     st.session_state[key] -= 1
                     st.rerun()
-            if plus.button("+", key=f"plus_{key}"):
+
+            c2.markdown(
+                f'<div class="counter-number">{st.session_state[key]}</div>',
+                unsafe_allow_html=True
+            )
+
+            if c3.button("+", key=f"plus_{key}"):
                 if st.session_state[key] < 12:
                     st.session_state[key] += 1
                     st.rerun()
 
-    # Zweite Zeile
+    # Zeile 2
     if anzahl > 3:
         remaining = anzahl - 3
         cols2 = st.columns(remaining)
 
         for i in range(remaining):
+            key = f"{res}_{i+3}"
             with cols2[i]:
-                key = f"{res}_{i+3}"
-                st.markdown('<div class="big-number">%d</div>' % st.session_state[key], unsafe_allow_html=True)
-                minus, plus = st.columns(2)
-                if minus.button("−", key=f"minus_{key}"):
+
+                c1, c2, c3 = st.columns([1,1,1])
+
+                if c1.button("−", key=f"minus_{key}"):
                     if st.session_state[key] > 0:
                         st.session_state[key] -= 1
                         st.rerun()
-                if plus.button("+", key=f"plus_{key}"):
+
+                c2.markdown(
+                    f'<div class="counter-number">{st.session_state[key]}</div>',
+                    unsafe_allow_html=True
+                )
+
+                if c3.button("+", key=f"plus_{key}"):
                     if st.session_state[key] < 12:
                         st.session_state[key] += 1
                         st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Score berechnen (live)
+    # Score live berechnen
     werte = [st.session_state[f"{res}_{i}"] for i in range(anzahl)]
     summe = func.Score(werte)
     Ergebnisse.append((res, summe))
 
 
 # -----------------------------
-# Live Ergebnis (immer sichtbar)
+# Ergebnis
 # -----------------------------
 st.divider()
 st.subheader("Ergebnis")
