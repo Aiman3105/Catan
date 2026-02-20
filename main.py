@@ -29,7 +29,7 @@ st.markdown("""
 /* ± Buttons */
 .stButton button { width:32px !important; height:32px !important; font-size:18px !important; padding:0 !important; border-radius:6px !important; }
 /* Reset Button breiter */
-#reset-button button { width:120px !important; height:40px !important; font-size:18px !important; }
+#reset-button button { width:240px !important; height:40px !important; font-size:18px !important; }
 /* Weniger Abstand zwischen Spalten */
 div[data-testid="column"] { padding-left:2px !important; padding-right:2px !important; }
 </style>
