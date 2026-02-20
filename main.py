@@ -3,93 +3,136 @@ import functions as func
 
 st.set_page_config(layout="centered")
 
-# Ressourcen + Anzahl Karten
+# -----------------------------
+# Ressourcen Definition
+# -----------------------------
 Ressourcen = {
-    "Stein": 5,
-    "Getreide": 6,
-    "Schaf": 6,
-    "Holz": 6,
-    "Lehm": 5
+    "Stein": {"anzahl": 5, "farbe": "#9E9E9E"},
+    "Getreide": {"anzahl": 6, "farbe": "#FBC02D"},
+    "Schaf": {"anzahl": 6, "farbe": "#66BB6A"},
+    "Holz": {"anzahl": 6, "farbe": "#2E7D32"},
+    "Lehm": {"anzahl": 5, "farbe": "#D84315"},
 }
 
 st.title("Ressourcen Rechner")
 
-# Mobile Optimierung
+# -----------------------------
+# CSS Styling (große Buttons!)
+# -----------------------------
 st.markdown("""
 <style>
-div[data-testid="stNumberInput"] input {
-    padding: 6px !important;
-    text-align: center;
-    font-size: 16px !important;
+.card {
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
 }
-div[data-testid="stNumberInput"] button {
-    height: 40px !important;
-    width: 40px !important;
+.counter-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.big-number {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+.stButton button {
+    width: 60px;
+    height: 45px;
+    font-size: 20px;
+    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ------------------------
-# Eingabebereich
-# ------------------------
-for ressource, anzahl in Ressourcen.items():
+# -----------------------------
+# Session State initialisieren
+# -----------------------------
+for res, data in Ressourcen.items():
+    for i in range(data["anzahl"]):
+        key = f"{res}_{i}"
+        if key not in st.session_state:
+            st.session_state[key] = 6
 
-    st.write(f"**{ressource}**")
+
+# -----------------------------
+# Reset Button
+# -----------------------------
+if st.button("🔄 Reset"):
+    for res, data in Ressourcen.items():
+        for i in range(data["anzahl"]):
+            st.session_state[f"{res}_{i}"] = 6
+    st.rerun()
+
+
+# -----------------------------
+# Ressourcen Cards
+# -----------------------------
+Ergebnisse = []
+
+for res, data in Ressourcen.items():
+
+    st.markdown(
+        f'<div class="card" style="background-color:{data["farbe"]}20;">'
+        f'<h3 style="color:{data["farbe"]};">{res}</h3>',
+        unsafe_allow_html=True
+    )
+
+    anzahl = data["anzahl"]
 
     # Erste Zeile (max 3)
     first_row = min(3, anzahl)
     cols1 = st.columns(first_row)
 
     for i in range(first_row):
-        cols1[i].number_input(
-            "",
-            key=f"{ressource}_{i+1}",
-            min_value=0,
-            max_value=12,
-            step=1,
-            value=6,
-            label_visibility="collapsed"
-        )
+        with cols1[i]:
+            key = f"{res}_{i}"
+            st.markdown('<div class="big-number">%d</div>' % st.session_state[key], unsafe_allow_html=True)
+            minus, plus = st.columns(2)
+            if minus.button("−", key=f"minus_{key}"):
+                if st.session_state[key] > 0:
+                    st.session_state[key] -= 1
+                    st.rerun()
+            if plus.button("+", key=f"plus_{key}"):
+                if st.session_state[key] < 12:
+                    st.session_state[key] += 1
+                    st.rerun()
 
-    # Zweite Zeile (falls nötig)
+    # Zweite Zeile
     if anzahl > 3:
         remaining = anzahl - 3
         cols2 = st.columns(remaining)
 
         for i in range(remaining):
-            cols2[i].number_input(
-                "",
-                key=f"{ressource}_{i+4}",
-                min_value=0,
-                max_value=12,
-                step=1,
-                value=6,
-                label_visibility="collapsed"
-            )
+            with cols2[i]:
+                key = f"{res}_{i+3}"
+                st.markdown('<div class="big-number">%d</div>' % st.session_state[key], unsafe_allow_html=True)
+                minus, plus = st.columns(2)
+                if minus.button("−", key=f"minus_{key}"):
+                    if st.session_state[key] > 0:
+                        st.session_state[key] -= 1
+                        st.rerun()
+                if plus.button("+", key=f"plus_{key}"):
+                    if st.session_state[key] < 12:
+                        st.session_state[key] += 1
+                        st.rerun()
 
-    st.divider()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Score berechnen (live)
+    werte = [st.session_state[f"{res}_{i}"] for i in range(anzahl)]
+    summe = func.Score(werte)
+    Ergebnisse.append((res, summe))
 
 
-# ------------------------
-# Berechnung
-# ------------------------
-if st.button("Rechne", use_container_width=True):
+# -----------------------------
+# Live Ergebnis (immer sichtbar)
+# -----------------------------
+st.divider()
+st.subheader("Ergebnis")
 
-    Ergebnisse = []
-
-    for ressource, anzahl in Ressourcen.items():
-        werte = [
-            st.session_state.get(f"{ressource}_{i}", 6)
-            for i in range(1, anzahl + 1)
-        ]
-
-        summe = func.Score(werte)
-        Ergebnisse.append((ressource, summe))
-
-    st.subheader("Ergebnis")
-
-    cols = st.columns(len(Ergebnisse))
-
-    for col, (res, erg) in zip(cols, Ergebnisse):
-        col.metric(label=res, value=erg)
+cols = st.columns(len(Ergebnisse))
+for col, (res, erg) in zip(cols, Ergebnisse):
+    col.metric(label=res, value=erg)
