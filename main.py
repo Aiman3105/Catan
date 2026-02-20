@@ -14,29 +14,21 @@ Ressourcen = {
 
 st.title("Ressourcen Rechner")
 
-# Mobile-Optimierung + größere +/- Buttons
+# Mobile Optimierung
 st.markdown("""
 <style>
-/* Zahl größer & verhindert iOS-Zoom */
 div[data-testid="stNumberInput"] input {
     padding: 6px !important;
     text-align: center;
     font-size: 16px !important;
 }
-
-/* +/- Buttons größer für Touch */
 div[data-testid="stNumberInput"] button {
-    height: 38px !important;
-    width: 38px !important;
-}
-
-/* Weniger Abstand zwischen Spalten */
-div[data-testid="column"] {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    height: 40px !important;
+    width: 40px !important;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ------------------------
 # Eingabebereich
@@ -45,20 +37,39 @@ for ressource, anzahl in Ressourcen.items():
 
     st.write(f"**{ressource}**")
 
-    cols = st.columns([1] * anzahl)
+    # Erste Zeile (max 3)
+    first_row = min(3, anzahl)
+    cols1 = st.columns(first_row)
 
-    for i in range(anzahl):
-        cols[i].number_input(
+    for i in range(first_row):
+        cols1[i].number_input(
             "",
-            key=f"{ressource}_{i + 1}",
+            key=f"{ressource}_{i+1}",
             min_value=0,
             max_value=12,
             step=1,
-            value=6,  # 🔥 Startwert jetzt 6
+            value=6,
             label_visibility="collapsed"
         )
 
+    # Zweite Zeile (falls nötig)
+    if anzahl > 3:
+        remaining = anzahl - 3
+        cols2 = st.columns(remaining)
+
+        for i in range(remaining):
+            cols2[i].number_input(
+                "",
+                key=f"{ressource}_{i+4}",
+                min_value=0,
+                max_value=12,
+                step=1,
+                value=6,
+                label_visibility="collapsed"
+            )
+
     st.divider()
+
 
 # ------------------------
 # Berechnung
@@ -78,7 +89,6 @@ if st.button("Rechne", use_container_width=True):
 
     st.subheader("Ergebnis")
 
-    # Alle Ergebnisse nebeneinander
     cols = st.columns(len(Ergebnisse))
 
     for col, (res, erg) in zip(cols, Ergebnisse):
