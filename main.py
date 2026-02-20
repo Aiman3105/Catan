@@ -28,8 +28,9 @@ st.markdown("""
 .counter-number { font-size:18px; font-weight:600; width:28px; text-align:center; display:inline-block; }
 /* ± Buttons */
 .stButton button { width:32px !important; height:32px !important; font-size:18px !important; padding:0 !important; border-radius:6px !important; }
-/* Reset Button breiter */
-#reset-button button { width:24000px !important; height:4000px !important; font-size:18px !important; }
+/* Reset Button breiter und inline */
+#reset-button { text-align:center; margin-bottom:8px; }
+#reset-button button { width:120px !important; height:36px !important; font-size:18px !important; white-space:nowrap !important; }
 /* Weniger Abstand zwischen Spalten */
 div[data-testid="column"] { padding-left:2px !important; padding-right:2px !important; }
 </style>
@@ -42,21 +43,21 @@ for res, data in Ressourcen.items():
     for i in range(data["anzahl"]):
         key = f"{res}_{i}"
         if key not in st.session_state:
-            st.session_state[key] = 7
+            st.session_state[key] = 7  # Startwert auf 7
 
 # -----------------------------
-# Reset Button
+# Reset Button (einzeilig)
 # -----------------------------
 st.markdown('<div id="reset-button">', unsafe_allow_html=True)
 if st.button("Reset"):
     for res, data in Ressourcen.items():
         for i in range(data["anzahl"]):
-            st.session_state[f"{res}_{i}"] = 7
+            st.session_state[f"{res}_{i}"] = 7  # Resetwert auf 7
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
-# Ressourcen Anzeige kompakt (alles in einer Reihe pro Ressource)
+# Ressourcen Anzeige kompakt
 # -----------------------------
 Ergebnisse = []
 
