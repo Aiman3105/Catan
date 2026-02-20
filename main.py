@@ -3,7 +3,6 @@ import functions as func
 
 st.set_page_config(layout="centered")
 
-# Ressourcen + Anzahl Karten
 Ressourcen = {
     "Stein": 5,
     "Getreide": 6,
@@ -14,29 +13,38 @@ Ressourcen = {
 
 st.title("Ressourcen Rechner")
 
+# Optional: etwas kompaktere Optik per CSS
+st.markdown("""
+<style>
+div[data-testid="stNumberInput"] input {
+    padding: 4px !important;
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # Eingabebereich
 for ressource, anzahl in Ressourcen.items():
-    with st.container():
-        st.subheader(ressource)
+    st.write(f"**{ressource}**")
 
-        # Mobile-optimiert (max 3 pro Reihe)
-        cols = st.columns(min(anzahl, 3))
+    cols = st.columns(anzahl)
 
-        for i in range(anzahl):
-            col = cols[i % len(cols)]
-            col.number_input(
-                f"Karte {i+1}",
-                key=f"{ressource}_{i+1}",
-                min_value=0,
-                max_value=12,
-                step=1,
-                value=6
-            )
+    for i in range(anzahl):
+        cols[i].number_input(
+            "",
+            key=f"{ressource}_{i+1}",
+            min_value=0,
+            max_value=12,
+            step=1,
+            value=0,
+            label_visibility="collapsed"
+        )
 
-        st.divider()
+    st.divider()
 
-# Berechnung
-# Berechnung
+
+# Ergebnis in einer Zeile
 if st.button("Rechne", use_container_width=True):
 
     Ergebnisse = []
@@ -52,8 +60,6 @@ if st.button("Rechne", use_container_width=True):
 
     st.subheader("Ergebnis")
 
-    # Alle Ergebnisse in einer Zeile
     cols = st.columns(len(Ergebnisse))
-
     for col, (res, erg) in zip(cols, Ergebnisse):
         col.metric(label=res, value=erg)
