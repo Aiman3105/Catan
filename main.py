@@ -36,6 +36,7 @@ for ressource, anzahl in Ressourcen.items():
         st.divider()
 
 # Berechnung
+# Berechnung
 if st.button("Rechne", use_container_width=True):
 
     Ergebnisse = []
@@ -51,5 +52,8 @@ if st.button("Rechne", use_container_width=True):
 
     st.subheader("Ergebnis")
 
-    for res, erg in Ergebnisse:
-        st.write(f"**{res}:** {erg}")
+    # Alle Ergebnisse in einer Zeile
+    cols = st.columns(len(Ergebnisse))
+
+    for col, (res, erg) in zip(cols, Ergebnisse):
+        col.metric(label=res, value=erg)
