@@ -5,52 +5,44 @@ st.set_page_config(layout="centered")
 
 Ressourcen = ["Stein", "Getreide", "Schaf", "Holz", "Lehm"]
 
-# zentrierter Container (macht es schmaler auf Mobile)
-outer_left, main, outer_right = st.columns([1, 6, 1])
+st.title("Test")
+st.title("Ressourcen Rechner")
 
-with main:
+werte_gesamt = {}
 
-    # Kopfzeile
-    header = st.columns([2,1,1,1,1,1])
-    header[0].write("Ressource")
-    for i in range(1, 6):
-        header[i].write(f"Karte {i}")
+# Jede Ressource als eigener Block (Mobile-optimiert)
+for ressource in Ressourcen:
+    with st.container():
+        st.subheader(ressource)
 
-    # Tabellenzeilen
-    for ressource in Ressourcen:
-        cols = st.columns([2,1,1,1,1,1])
-
-        cols[0].write(ressource)
-
-        for i in range(1, 6):
-            cols[i].number_input(
-                "",
-                key=f"{ressource}_{i}",
-                label_visibility="collapsed",
+        cols = st.columns(5)
+        for i in range(5):
+            werte_gesamt[f"{ressource}_{i + 1}"] = cols[i].number_input(
+                f"Karte {i + 1}",
+                key=f"{ressource}_{i + 1}",
                 min_value=0,
                 max_value=12,
                 step=1,
                 value=0
             )
 
-    werte=[]
-    Summe=0
-    Ergebnisse=[]
-    Final=[]
+        st.divider()
 
-    # Ergebnis
-    if st.button("Rechne", use_container_width=True):
-        Ergebnis = st.columns([2,1,1,1,1])
+# Berechnung
+if st.button("Rechne", use_container_width=True):
 
-        for Ressource in Ressourcen:
-            for i in range (1, 6):
-                werte.append(st.session_state.get(f"{Ressource}_{i}", ""))
-            Summe=func.Score(werte)
-            Ergebnisse.append(Summe)
-            werte=[]
-            Summe=0
+    Ergebnisse = []
 
-        Final = list(zip(Ressourcen, Ergebnisse))
+    for ressource in Ressourcen:
+        werte = [
+            st.session_state.get(f"{ressource}_{i}", 0)
+            for i in range(1, 6)
+        ]
 
-        for i in range(0,5):
-            Ergebnis[i].write(f"{Final[i][0]} : {Final[i][1]}")
+        summe = func.Score(werte)
+        Ergebnisse.append(summe)
+
+    st.subheader("Ergebnis")
+
+    for res, erg in zip(Ressourcen, Ergebnisse):
+        st.write(f"**{res}:** {erg}")
