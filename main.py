@@ -30,7 +30,7 @@ for ressource, anzahl in Ressourcen.items():
                 min_value=0,
                 max_value=12,
                 step=1,
-                value=0
+                value=6
             )
 
         st.divider()
